@@ -129,9 +129,11 @@ def processAndPredictData(scaler, list_5min):
     list=[]
     arr=test=np.array(list_5min)
     arr=scaler.fit_transform(arr)
+    # process data
     x = np.concatenate((arr, np.array([[0 for _ in range(13)] for _ in range(5 -1)])), axis=0)
     list.append(x)
     torch_l= torch.Tensor(np.array(list))
+    # predict data
     with torch.no_grad():
         prediction = model(torch_l)
     predict_arr  = scaler.inverse_transform(prediction[0].numpy())
@@ -170,6 +172,7 @@ delta1=1
 ubound=100
 min_s1_u = list()
 min_s1_i = list()
+# sampling algorithm
 def executeSampling(delta0, delta1, ubound):
     global s0
     global scaler
@@ -216,10 +219,12 @@ def submitData():
     global s0_t
     data = request.get_json(force=True)
     with data_lock:
+        # collect all data from the phone
         if switch==0:
             ground_Truth_h+=data.get('hearts')
             ground_Truth_t+=timeProcess(data.get('timestamp'))
             collectAllData()
+        # collect base on the sampling algorithm
         if switch==1:
             s0+=data.get('hearts')
             s0_t+=timeProcess(data.get('timestamp'))
@@ -244,15 +249,16 @@ def collectAllData():
         for i, index in enumerate(min_s1_i):
             pre_with_ground[-5+index] = selected_data[i]
     min_s1_u, min_s1_i= executeSampling(delta0, delta1, ubound)
-    with open('groundtruth_h_1.json', 'w') as f:
+    # store the data
+    with open('groundtruth_h_0.json', 'w') as f:
         json.dump(ground_Truth_h, f)
-    with open('groundtruth_time_1.json', 'w') as f:
+    with open('groundtruth_time_0.json', 'w') as f:
         json.dump(ground_Truth_t, f)
-    with open('s0_1.json', 'w') as f:
+    with open('s0_0.json', 'w') as f:
         json.dump(s0, f)
-    with open('s0_time_stamp_1.json', 'w') as f:
+    with open('s0_time_stamp_0.json', 'w') as f:
         json.dump(s0_t, f)
-    with open('pre_with_ground_1.json', 'w') as f:
+    with open('pre_with_ground_0.json', 'w') as f:
         json.dump(pre_with_ground, f)
     with open('u_1.json', 'w') as f:
         json.dump(u, f)
@@ -272,13 +278,14 @@ def onlyCollectSampling():
     print(min_s1_i)
     for index in min_s1_i:
         indicators[index] = 1
-    with open('s0_2.json', 'w') as f:
+    # store the data
+    with open('s0_1.json', 'w') as f:
         json.dump(s0, f)
-    with open('s0_time_stamp_2.json', 'w') as f:
+    with open('s0_time_stamp_1.json', 'w') as f:
         json.dump(s0_t, f)
-    with open('pre_with_ground_2.json', 'w') as f:
+    with open('pre_with_ground_1.json', 'w') as f:
         json.dump(pre_with_ground, f)
-    with open('u_2.json', 'w') as f:
+    with open('u_1.json', 'w') as f:
         json.dump(u, f)
     return 1
 
